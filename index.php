@@ -7,7 +7,7 @@ $currentUser = getCurrentUser();
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Sistem Pengelolaan Laundry - Mobile App</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -30,21 +30,77 @@ $currentUser = getCurrentUser();
 
     <style>
         body {
-            background-color: #f1f5f9;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
         }
-        .app-container {
-            max-width: 460px;
-            margin: 0 auto;
-            min-height: 100vh;
-            background: #ffffff;
-            box-shadow: 0 4px 25px rgba(0,0,0,0.08);
-            display: flex;
-            flex-direction: column;
-            position: relative;
+
+        /* Desktop View: Realistic Smartphone Mockup Frame */
+        @media (min-width: 640px) {
+            body {
+                background: radial-gradient(circle at 50% 20%, #1e293b 0%, #0f172a 100%);
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px 0;
+            }
+            .phone-bezel {
+                width: 420px;
+                height: 870px;
+                max-height: 94vh;
+                background: #ffffff;
+                border-radius: 46px;
+                border: 11px solid #0f172a;
+                outline: 2px solid rgba(255, 255, 255, 0.1);
+                box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.08);
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+                position: relative;
+            }
+            .phone-status-bar {
+                display: flex;
+            }
+            .phone-home-indicator {
+                display: block;
+            }
         }
-        /* Media Print untuk Nota */
+
+        /* Mobile & APK View: 100% Fullscreen Responsive */
+        @media (max-width: 639px) {
+            body {
+                background-color: #ffffff;
+                min-height: 100vh;
+            }
+            .phone-bezel {
+                width: 100%;
+                min-height: 100vh;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                display: flex;
+                flex-direction: column;
+            }
+            .phone-status-bar {
+                display: none !important;
+            }
+            .phone-home-indicator {
+                display: none !important;
+            }
+        }
+
+        /* Hide scrollbars for native feel */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Print Nota Stylesheet */
         @media print {
             body * {
                 visibility: hidden;
@@ -70,9 +126,30 @@ $currentUser = getCurrentUser();
 </head>
 <body class="antialiased text-slate-800">
 
-<div class="app-container pb-20">
-    <!-- Top App Bar -->
-    <header class="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white p-4 sticky top-0 z-30 shadow-md">
+<!-- FLOATING TOAST CONTAINER -->
+<div id="toastContainer" class="fixed top-5 left-1/2 -translate-x-1/2 z-[9999] w-[90%] max-w-[380px] pointer-events-none flex flex-col space-y-2"></div>
+
+<!-- SMARTPHONE FRAME MOCKUP (DESKTOP) / FULLSCREEN CONTAINER (MOBILE/APK) -->
+<div class="phone-bezel">
+
+    <!-- SIMULATED PHONE STATUS BAR (DESKTOP PREVIEW) -->
+    <div class="phone-status-bar bg-blue-600 text-white text-[11px] font-semibold px-6 py-2 items-center justify-between select-none tracking-tight flex-shrink-0 z-40">
+        <span id="statusBarClock">09:41</span>
+        <!-- Notch / Dynamic Island -->
+        <div class="w-20 h-4 bg-slate-900/60 rounded-full flex items-center justify-center space-x-1">
+            <div class="w-1.5 h-1.5 rounded-full bg-slate-800"></div>
+            <div class="w-2.5 h-1 rounded-full bg-blue-400/40"></div>
+        </div>
+        <!-- Status Icons -->
+        <div class="flex items-center space-x-1.5 text-[10px]">
+            <i class="fa-solid fa-signal"></i>
+            <i class="fa-solid fa-wifi"></i>
+            <i class="fa-solid fa-battery-full text-xs text-emerald-300"></i>
+        </div>
+    </div>
+
+    <!-- TOP APP BAR -->
+    <header class="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white p-4 sticky top-0 z-30 shadow-md flex-shrink-0">
         <div class="flex items-center justify-between">
             <div class="flex items-center space-x-2.5">
                 <div class="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm text-white shadow-inner">
@@ -93,11 +170,11 @@ $currentUser = getCurrentUser();
                             <?= htmlspecialchars($currentUser['peran']) ?>
                         </span>
                     </div>
-                    <button onclick="handleLogout()" title="Logout" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/25 flex items-center justify-center text-white transition">
+                    <button onclick="handleLogout()" title="Logout" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/25 flex items-center justify-center text-white transition active:scale-95">
                         <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
                     </button>
                 <?php else: ?>
-                    <a href="cek_status.php" class="text-xs bg-white/15 hover:bg-white/25 px-3 py-1.5 rounded-full transition font-semibold flex items-center space-x-1.5">
+                    <a href="cek_status.php" class="text-xs bg-white/15 hover:bg-white/25 px-3 py-1.5 rounded-full transition font-semibold flex items-center space-x-1.5 active:scale-95">
                         <i class="fa-solid fa-magnifying-glass text-[11px]"></i>
                         <span>Cek Status</span>
                     </a>
@@ -106,8 +183,8 @@ $currentUser = getCurrentUser();
         </div>
     </header>
 
-    <!-- CONTENT CONTAINER -->
-    <main class="flex-1 p-4" id="mainAppContent">
+    <!-- CONTENT SCROLLABLE AREA -->
+    <main class="flex-1 overflow-y-auto p-4 hide-scrollbar relative bg-slate-50/50 pb-24" id="mainAppContent">
         <?php if (!$currentUser): ?>
         <!-- ========================================================== -->
         <!-- VIEW: LOGIN PENGGUNA (D6 Akun Pengguna) -->
@@ -137,7 +214,7 @@ $currentUser = getCurrentUser();
                             <i class="fa-solid fa-user text-sm"></i>
                         </span>
                         <input type="text" id="loginUsername" required placeholder="Masukkan username" 
-                               class="w-full pl-9 pr-3 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                               class="w-full pl-9 pr-3 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
                     </div>
                 </div>
 
@@ -148,7 +225,7 @@ $currentUser = getCurrentUser();
                             <i class="fa-solid fa-lock text-sm"></i>
                         </span>
                         <input type="password" id="loginPassword" required placeholder="Masukkan kata sandi" 
-                               class="w-full pl-9 pr-3 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                               class="w-full pl-9 pr-3 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
                     </div>
                 </div>
 
@@ -158,26 +235,9 @@ $currentUser = getCurrentUser();
                 </button>
             </form>
 
-            <!-- Quick Demo Login Switcher -->
-            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-center">
-                <p class="text-xs font-semibold text-slate-600 mb-2.5">
-                    <i class="fa-solid fa-bolt text-amber-500 mr-1"></i> Uji Coba Cepat (Akun Default):
-                </p>
-                <div class="grid grid-cols-2 gap-2">
-                    <button type="button" onclick="fillQuickLogin('pemilik', 'password123')" class="p-2.5 bg-white border border-slate-200 rounded-xl hover:border-blue-400 text-left transition shadow-xs">
-                        <p class="text-xs font-bold text-blue-700">A-01: Pemilik</p>
-                        <p class="text-[10px] text-slate-500">Akses Penuh (1, 2, 3, 5)</p>
-                    </button>
-                    <button type="button" onclick="fillQuickLogin('petugas', 'password123')" class="p-2.5 bg-white border border-slate-200 rounded-xl hover:border-blue-400 text-left transition shadow-xs">
-                        <p class="text-xs font-bold text-indigo-700">A-02: Petugas</p>
-                        <p class="text-[10px] text-slate-500">Akses Status (Proses 3.0)</p>
-                    </button>
-                </div>
-            </div>
-
             <!-- Link Pelanggan Publik -->
             <div class="text-center pt-2">
-                <a href="cek_status.php" class="inline-flex items-center space-x-1.5 text-xs text-blue-600 hover:text-blue-800 font-semibold bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-full transition">
+                <a href="cek_status.php" class="inline-flex items-center space-x-1.5 text-xs text-blue-600 hover:text-blue-800 font-semibold bg-blue-50 hover:bg-blue-100 px-4 py-2.5 rounded-full transition active:scale-95 shadow-xs">
                     <i class="fa-solid fa-eye"></i>
                     <span>Pelanggan? Klik Cek Status Tanpa Login (Proses 4.0)</span>
                 </a>
@@ -214,7 +274,7 @@ $currentUser = getCurrentUser();
                             <input type="tel" id="inputNoHp" required placeholder="08xxxxxxxxxx" onblur="checkPelangganLama(this.value)"
                                    class="flex-1 px-3 py-2 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none">
                             <button type="button" onclick="checkPelangganLama(document.getElementById('inputNoHp').value)" 
-                                    class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center space-x-1">
+                                    class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center space-x-1 active:scale-95">
                                 <i class="fa-solid fa-magnifying-glass"></i>
                                 <span>Cek</span>
                             </button>
@@ -292,7 +352,7 @@ $currentUser = getCurrentUser();
                         <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">
                             <i class="fa-solid fa-tags text-amber-500 mr-1.5"></i> Rincian Item Cucian (D3 - Opsional)
                         </h3>
-                        <button type="button" onclick="tambahBarisItem()" class="text-xs text-blue-600 hover:text-blue-800 font-semibold flex items-center space-x-1">
+                        <button type="button" onclick="tambahBarisItem()" class="text-xs text-blue-600 hover:text-blue-800 font-semibold flex items-center space-x-1 active:scale-95">
                             <i class="fa-solid fa-plus-circle"></i>
                             <span>Tambah Item</span>
                         </button>
@@ -352,7 +412,7 @@ $currentUser = getCurrentUser();
                 <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
                     <i class="fa-solid fa-search text-xs"></i>
                 </span>
-                <button onclick="clearSearch()" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600">
+                <button onclick="clearSearch()" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 active:scale-95">
                     <i class="fa-solid fa-times text-xs"></i>
                 </button>
             </div>
@@ -381,19 +441,19 @@ $currentUser = getCurrentUser();
                     </h2>
                     <p class="text-xs text-slate-500">Pembaruan status pengerjaan (D2) & antar-jemput (D5)</p>
                 </div>
-                <button onclick="loadStatusOrders()" class="text-xs text-blue-600 hover:text-blue-800 font-semibold p-1.5 rounded-lg bg-blue-50">
+                <button onclick="loadStatusOrders()" class="text-xs text-blue-600 hover:text-blue-800 font-semibold p-1.5 rounded-lg bg-blue-50 active:scale-95">
                     <i class="fa-solid fa-rotate-right"></i>
                 </button>
             </div>
 
             <!-- Filter Status Baku Stepper -->
-            <div class="overflow-x-auto pb-1 -mx-1 px-1 flex space-x-1.5 text-[11px]">
-                <button onclick="filterStatusTab('all')" class="status-filter-btn active px-3 py-1.5 rounded-xl font-semibold bg-blue-600 text-white shadow-xs whitespace-nowrap" data-filter="all">Semua</button>
-                <button onclick="filterStatusTab('Diterima')" class="status-filter-btn px-3 py-1.5 rounded-xl font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap" data-filter="Diterima">Diterima</button>
-                <button onclick="filterStatusTab('Dicuci')" class="status-filter-btn px-3 py-1.5 rounded-xl font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap" data-filter="Dicuci">Dicuci</button>
-                <button onclick="filterStatusTab('Disetrika')" class="status-filter-btn px-3 py-1.5 rounded-xl font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap" data-filter="Disetrika">Disetrika</button>
-                <button onclick="filterStatusTab('Siap Diambil/Diantar')" class="status-filter-btn px-3 py-1.5 rounded-xl font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap" data-filter="Siap Diambil/Diantar">Siap</button>
-                <button onclick="filterStatusTab('Selesai')" class="status-filter-btn px-3 py-1.5 rounded-xl font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap" data-filter="Selesai">Selesai</button>
+            <div class="overflow-x-auto pb-1 -mx-1 px-1 flex space-x-1.5 text-[11px] hide-scrollbar">
+                <button onclick="filterStatusTab('all')" class="status-filter-btn active px-3 py-1.5 rounded-xl font-semibold bg-blue-600 text-white shadow-xs whitespace-nowrap active:scale-95" data-filter="all">Semua</button>
+                <button onclick="filterStatusTab('Diterima')" class="status-filter-btn px-3 py-1.5 rounded-xl font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap active:scale-95" data-filter="Diterima">Diterima</button>
+                <button onclick="filterStatusTab('Dicuci')" class="status-filter-btn px-3 py-1.5 rounded-xl font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap active:scale-95" data-filter="Dicuci">Dicuci</button>
+                <button onclick="filterStatusTab('Disetrika')" class="status-filter-btn px-3 py-1.5 rounded-xl font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap active:scale-95" data-filter="Disetrika">Disetrika</button>
+                <button onclick="filterStatusTab('Siap Diambil/Diantar')" class="status-filter-btn px-3 py-1.5 rounded-xl font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap active:scale-95" data-filter="Siap Diambil/Diantar">Siap</button>
+                <button onclick="filterStatusTab('Selesai')" class="status-filter-btn px-3 py-1.5 rounded-xl font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap active:scale-95" data-filter="Selesai">Selesai</button>
             </div>
 
             <!-- List Orders for Process 3.0 -->
@@ -429,7 +489,7 @@ $currentUser = getCurrentUser();
                            class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
                 </div>
 
-                <button type="submit" id="btnSubmitCucianHilang" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-3 rounded-xl text-xs flex items-center justify-center space-x-1.5 transition">
+                <button type="submit" id="btnSubmitCucianHilang" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-3 rounded-xl text-xs flex items-center justify-center space-x-1.5 transition active:scale-[0.98]">
                     <i class="fa-solid fa-floppy-disk"></i>
                     <span>Simpan ke Data Store D4</span>
                 </button>
@@ -439,7 +499,7 @@ $currentUser = getCurrentUser();
             <div class="space-y-2.5">
                 <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center justify-between">
                     <span>Daftar Cucian Tanpa Pemilik (D4)</span>
-                    <button onclick="loadCucianHilangList()" class="text-blue-600 hover:text-blue-800 text-[11px] font-semibold">
+                    <button onclick="loadCucianHilangList()" class="text-blue-600 hover:text-blue-800 text-[11px] font-semibold active:scale-95">
                         <i class="fa-solid fa-rotate-right"></i> Refresh
                     </button>
                 </h3>
@@ -448,47 +508,80 @@ $currentUser = getCurrentUser();
                 </div>
             </div>
         </section>
-
-        <!-- BOTTOM NAVIGATION BAR (Khusus Pengguna Login) -->
-        <nav class="fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-md border-t border-slate-200">
-            <div class="max-w-[460px] mx-auto flex items-center justify-around py-2">
-                <?php if ($currentUser['peran'] === 'Pemilik'): ?>
-                    <button onclick="switchTab('tabProses1')" id="navProses1" class="nav-item active flex flex-col items-center text-blue-600 py-1 px-2 transition">
-                        <i class="fa-solid fa-file-circle-plus text-base mb-1"></i>
-                        <span class="text-[10px] font-semibold">Catat (1.0)</span>
-                    </button>
-                    <button onclick="switchTab('tabProses2')" id="navProses2" class="nav-item flex flex-col items-center text-slate-400 hover:text-blue-600 py-1 px-2 transition">
-                        <i class="fa-solid fa-magnifying-glass text-base mb-1"></i>
-                        <span class="text-[10px] font-medium">Cari (2.0)</span>
-                    </button>
-                    <button onclick="switchTab('tabProses3')" id="navProses3" class="nav-item flex flex-col items-center text-slate-400 hover:text-blue-600 py-1 px-2 transition">
-                        <i class="fa-solid fa-arrows-rotate text-base mb-1"></i>
-                        <span class="text-[10px] font-medium">Status (3.0)</span>
-                    </button>
-                    <button onclick="switchTab('tabProses5')" id="navProses5" class="nav-item flex flex-col items-center text-slate-400 hover:text-blue-600 py-1 px-2 transition">
-                        <i class="fa-solid fa-basket-shopping text-base mb-1"></i>
-                        <span class="text-[10px] font-medium">Cucian (5.0)</span>
-                    </button>
-                <?php else: ?>
-                    <!-- Petugas Operasional: Hanya Akses Proses 3.0 -->
-                    <button onclick="switchTab('tabProses3')" id="navProses3" class="nav-item active flex flex-col items-center text-blue-600 py-1 px-6 transition">
-                        <i class="fa-solid fa-arrows-rotate text-lg mb-1"></i>
-                        <span class="text-xs font-bold">Kelola Status & Antar-Jemput (Proses 3.0)</span>
-                    </button>
-                <?php endif; ?>
-            </div>
-        </nav>
         <?php endif; ?>
     </main>
+
+    <!-- BOTTOM NAVIGATION BAR (Khusus Pengguna Login) -->
+    <?php if ($currentUser): ?>
+    <nav class="absolute bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-slate-200 flex-shrink-0">
+        <div class="flex items-center justify-around py-1.5">
+            <?php if ($currentUser['peran'] === 'Pemilik'): ?>
+                <button onclick="switchTab('tabProses1')" id="navProses1" class="nav-item active flex flex-col items-center text-blue-600 py-1 px-2.5 transition active:scale-90">
+                    <i class="fa-solid fa-file-circle-plus text-base mb-0.5"></i>
+                    <span class="text-[10px] font-semibold">Catat (1.0)</span>
+                </button>
+                <button onclick="switchTab('tabProses2')" id="navProses2" class="nav-item flex flex-col items-center text-slate-400 hover:text-blue-600 py-1 px-2.5 transition active:scale-90">
+                    <i class="fa-solid fa-magnifying-glass text-base mb-0.5"></i>
+                    <span class="text-[10px] font-medium">Cari (2.0)</span>
+                </button>
+                <button onclick="switchTab('tabProses3')" id="navProses3" class="nav-item flex flex-col items-center text-slate-400 hover:text-blue-600 py-1 px-2.5 transition active:scale-90">
+                    <i class="fa-solid fa-arrows-rotate text-base mb-0.5"></i>
+                    <span class="text-[10px] font-medium">Status (3.0)</span>
+                </button>
+                <button onclick="switchTab('tabProses5')" id="navProses5" class="nav-item flex flex-col items-center text-slate-400 hover:text-blue-600 py-1 px-2.5 transition active:scale-90">
+                    <i class="fa-solid fa-basket-shopping text-base mb-0.5"></i>
+                    <span class="text-[10px] font-medium">Cucian (5.0)</span>
+                </button>
+            <?php else: ?>
+                <!-- Petugas Operasional: Hanya Akses Proses 3.0 -->
+                <button onclick="switchTab('tabProses3')" id="navProses3" class="nav-item active flex flex-col items-center text-blue-600 py-1.5 px-6 transition active:scale-95">
+                    <i class="fa-solid fa-arrows-rotate text-lg mb-1"></i>
+                    <span class="text-xs font-bold">Kelola Status & Antar-Jemput (Proses 3.0)</span>
+                </button>
+            <?php endif; ?>
+        </div>
+    </nav>
+    <?php endif; ?>
+
+    <!-- SIMULATED PHONE BOTTOM HOME INDICATOR (DESKTOP PREVIEW) -->
+    <div class="phone-home-indicator py-1.5 bg-white select-none flex-shrink-0 z-40">
+        <div class="w-28 h-1 bg-slate-300 rounded-full mx-auto"></div>
+    </div>
+
+</div>
+
+<!-- ================================================================== -->
+<!-- REUSABLE GENERIC CONFIRMATION MODAL                                -->
+<!-- ================================================================== -->
+<div id="modalGenericConfirm" class="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 hidden backdrop-blur-xs">
+    <div class="bg-white w-full max-w-sm rounded-3xl p-5 shadow-2xl space-y-4 border border-slate-100">
+        <div class="flex items-center space-x-3">
+            <div id="genConfirmIconWrap" class="w-11 h-11 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center text-lg flex-shrink-0">
+                <i id="genConfirmIcon" class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div>
+                <h3 id="genConfirmTitle" class="text-sm font-bold text-slate-800">Konfirmasi Tindakan</h3>
+                <p id="genConfirmMessage" class="text-xs text-slate-500 leading-relaxed mt-0.5">Apakah Anda yakin?</p>
+            </div>
+        </div>
+        <div class="grid grid-cols-2 gap-2 pt-1">
+            <button type="button" onclick="closeGenericConfirm(false)" class="w-full py-2.5 px-3 rounded-xl border border-slate-200 text-slate-700 font-semibold text-xs hover:bg-slate-50 transition active:scale-95">
+                Batal
+            </button>
+            <button type="button" id="btnGenConfirmAction" class="w-full py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-500/20 transition active:scale-95">
+                Ya, Lanjutkan
+            </button>
+        </div>
+    </div>
 </div>
 
 <!-- ================================================================== -->
 <!-- MODAL DIALOG KONFIRMASI SIMPAN PESANAN (Proses 1.0)                 -->
 <!-- ================================================================== -->
 <div id="modalKonfirmasiPesanan" class="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 hidden backdrop-blur-xs">
-    <div class="bg-white w-full max-w-sm rounded-2xl p-5 shadow-2xl space-y-4 animate-scale-up">
+    <div class="bg-white w-full max-w-sm rounded-3xl p-5 shadow-2xl space-y-4 border border-slate-100">
         <div class="flex items-center space-x-3 text-blue-600">
-            <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-lg">
+            <div class="w-10 h-10 bg-blue-50 rounded-2xl flex items-center justify-center text-lg">
                 <i class="fa-solid fa-clipboard-check"></i>
             </div>
             <div>
@@ -497,7 +590,7 @@ $currentUser = getCurrentUser();
             </div>
         </div>
 
-        <div class="bg-slate-50 rounded-xl p-3 text-xs space-y-2 border border-slate-200">
+        <div class="bg-slate-50 rounded-2xl p-3.5 text-xs space-y-2 border border-slate-200">
             <div class="flex justify-between">
                 <span class="text-slate-500">Pelanggan:</span>
                 <span class="font-bold text-slate-800" id="konfNama">-</span>
@@ -525,10 +618,10 @@ $currentUser = getCurrentUser();
         </div>
 
         <div class="grid grid-cols-2 gap-2 pt-1">
-            <button type="button" onclick="closeKonfirmasiPesananModal()" class="w-full py-2.5 px-3 rounded-xl border border-slate-300 text-slate-700 font-semibold text-xs hover:bg-slate-50">
+            <button type="button" onclick="closeKonfirmasiPesananModal()" class="w-full py-2.5 px-3 rounded-xl border border-slate-200 text-slate-700 font-semibold text-xs hover:bg-slate-50 transition active:scale-95">
                 Batal
             </button>
-            <button type="button" onclick="submitSimpanPesanan()" id="btnSubmitPesananFinal" class="w-full py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-500/20">
+            <button type="button" onclick="submitSimpanPesanan()" id="btnSubmitPesananFinal" class="w-full py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-500/20 transition active:scale-95">
                 Ya, Simpan Pesanan
             </button>
         </div>
@@ -539,7 +632,7 @@ $currentUser = getCurrentUser();
 <!-- MODAL NOTA DIGITAL & QR CODE (Proses 1.0)                          -->
 <!-- ================================================================== -->
 <div id="modalNotaDigital" class="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 hidden backdrop-blur-xs">
-    <div class="bg-white w-full max-w-sm rounded-2xl p-5 shadow-2xl max-h-[90vh] overflow-y-auto space-y-4">
+    <div class="bg-white w-full max-w-sm rounded-3xl p-5 shadow-2xl max-h-[90vh] overflow-y-auto space-y-4 border border-slate-100 hide-scrollbar">
         <!-- Printable Nota Area -->
         <div id="printableNota" class="space-y-3.5 border-b border-dashed border-slate-300 pb-4">
             <div class="text-center">
@@ -594,16 +687,16 @@ $currentUser = getCurrentUser();
         <!-- Tombol Aksi Nota -->
         <div class="space-y-2 no-print">
             <div class="grid grid-cols-2 gap-2">
-                <button type="button" onclick="window.print()" class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-semibold text-xs flex items-center justify-center space-x-1.5 shadow">
+                <button type="button" onclick="window.print()" class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-semibold text-xs flex items-center justify-center space-x-1.5 shadow active:scale-95 transition">
                     <i class="fa-solid fa-print"></i>
                     <span>Cetak Nota</span>
                 </button>
-                <a id="notaBtnBukaCek" href="#" target="_blank" class="py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs flex items-center justify-center space-x-1.5 shadow">
+                <a id="notaBtnBukaCek" href="#" target="_blank" class="py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs flex items-center justify-center space-x-1.5 shadow active:scale-95 transition">
                     <i class="fa-solid fa-arrow-up-right-from-square"></i>
                     <span>Buka Cek Status</span>
                 </a>
             </div>
-            <button type="button" onclick="closeNotaModal()" class="w-full py-2 px-3 rounded-xl border border-slate-300 text-slate-700 font-semibold text-xs hover:bg-slate-50">
+            <button type="button" onclick="closeNotaModal()" class="w-full py-2 px-3 rounded-xl border border-slate-200 text-slate-700 font-semibold text-xs hover:bg-slate-50 transition active:scale-95">
                 Selesai / Transaksi Baru
             </button>
         </div>
@@ -614,27 +707,27 @@ $currentUser = getCurrentUser();
 <!-- MODAL DETAIL PESANAN LENGKAP (Proses 2.0 & 3.0)                    -->
 <!-- ================================================================== -->
 <div id="modalDetailPesanan" class="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 hidden backdrop-blur-xs">
-    <div class="bg-white w-full max-w-sm rounded-2xl p-5 shadow-2xl max-h-[90vh] overflow-y-auto space-y-4">
+    <div class="bg-white w-full max-w-sm rounded-3xl p-5 shadow-2xl max-h-[90vh] overflow-y-auto space-y-4 border border-slate-100 hide-scrollbar">
         <div class="flex items-center justify-between pb-2 border-b border-slate-200">
             <div>
                 <span class="text-[10px] font-mono font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded" id="detNoPesanan">-</span>
                 <h3 class="text-sm font-bold text-slate-800 mt-1" id="detNamaPelanggan">-</h3>
             </div>
-            <button onclick="closeDetailModal()" class="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center">
+            <button onclick="closeDetailModal()" class="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center transition active:scale-90">
                 <i class="fa-solid fa-times text-xs"></i>
             </button>
         </div>
 
         <div class="text-xs space-y-3">
             <!-- Info D1 Pelanggan -->
-            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
+            <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-1">
                 <h4 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Data Pelanggan (D1)</h4>
                 <p><strong>No. HP:</strong> <span id="detNoHp">-</span></p>
                 <p><strong>Alamat:</strong> <span id="detAlamat">-</span></p>
             </div>
 
             <!-- Info D2 Pesanan -->
-            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
+            <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-1">
                 <h4 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Data Pesanan (D2)</h4>
                 <p><strong>Tanggal Titip:</strong> <span id="detTanggalTitip">-</span></p>
                 <p><strong>Layanan:</strong> <span id="detJenisLayanan">-</span> (<span id="detBerat">-</span> kg)</p>
@@ -645,13 +738,13 @@ $currentUser = getCurrentUser();
             </div>
 
             <!-- Info D3 Rincian Item -->
-            <div id="detSectionD3" class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1.5 hidden">
+            <div id="detSectionD3" class="bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-1.5 hidden">
                 <h4 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Rincian Item Cucian (D3)</h4>
                 <ul id="detListD3" class="space-y-1 divide-y divide-slate-200 text-[11px]"></ul>
             </div>
 
             <!-- Info D5 Antar-Jemput -->
-            <div id="detSectionD5" class="bg-emerald-50 p-3 rounded-xl border border-emerald-200 space-y-1 hidden">
+            <div id="detSectionD5" class="bg-emerald-50 p-3 rounded-2xl border border-emerald-200 space-y-1 hidden">
                 <h4 class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">Layanan Antar-Jemput (D5)</h4>
                 <p><strong>Layanan:</strong> <span id="detAJJenis">-</span></p>
                 <p><strong>Alamat:</strong> <span id="detAJAlamat">-</span></p>
@@ -659,13 +752,13 @@ $currentUser = getCurrentUser();
             </div>
 
             <!-- Info D7 Riwayat Status -->
-            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1.5">
+            <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-1.5">
                 <h4 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Riwayat Status (D7)</h4>
-                <div id="detListD7" class="space-y-2 text-[11px] max-h-40 overflow-y-auto"></div>
+                <div id="detListD7" class="space-y-2 text-[11px] max-h-40 overflow-y-auto hide-scrollbar"></div>
             </div>
         </div>
 
-        <button type="button" onclick="closeDetailModal()" class="w-full py-2 rounded-xl bg-slate-800 text-white font-semibold text-xs">
+        <button type="button" onclick="closeDetailModal()" class="w-full py-2.5 rounded-xl bg-slate-800 text-white font-semibold text-xs active:scale-95 transition">
             Tutup
         </button>
     </div>
@@ -675,9 +768,9 @@ $currentUser = getCurrentUser();
 <!-- MODAL UBAH STATUS PENGERJAAN & ANTAR-JEMPUT (Proses 3.0)           -->
 <!-- ================================================================== -->
 <div id="modalUbahStatus" class="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 hidden backdrop-blur-xs">
-    <div class="bg-white w-full max-w-sm rounded-2xl p-5 shadow-2xl space-y-4">
+    <div class="bg-white w-full max-w-sm rounded-3xl p-5 shadow-2xl space-y-4 border border-slate-100">
         <div class="flex items-center space-x-3 text-blue-600">
-            <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-lg">
+            <div class="w-10 h-10 bg-blue-50 rounded-2xl flex items-center justify-center text-lg">
                 <i class="fa-solid fa-pen-to-square"></i>
             </div>
             <div>
@@ -706,10 +799,10 @@ $currentUser = getCurrentUser();
         </div>
 
         <div class="grid grid-cols-2 gap-2 pt-2">
-            <button type="button" onclick="closeUbahStatusModal()" class="py-2.5 px-3 rounded-xl border border-slate-300 text-slate-700 font-semibold text-xs hover:bg-slate-50">
+            <button type="button" onclick="closeUbahStatusModal()" class="py-2.5 px-3 rounded-xl border border-slate-200 text-slate-700 font-semibold text-xs hover:bg-slate-50 transition active:scale-95">
                 Batal
             </button>
-            <button type="button" onclick="submitPerubahanStatus()" id="btnSubmitStatusFinal" class="py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-500/20">
+            <button type="button" onclick="submitPerubahanStatus()" id="btnSubmitStatusFinal" class="py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-500/20 transition active:scale-95">
                 Konfirmasi Ubah
             </button>
         </div>
@@ -726,6 +819,97 @@ $currentUser = getCurrentUser();
     // Status Baku Definisi DFD
     const STATUS_PENGERJAAN_BAKU = ['Diterima', 'Dicuci', 'Disetrika', 'Siap Diambil/Diantar', 'Selesai'];
     const STATUS_AJ_BAKU = ['Dijadwalkan', 'Dijemput', 'Diantar', 'Selesai'];
+
+    // ----------------------------------------------------------------
+    // MODERN FLOATING TOAST NOTIFICATION SYSTEM
+    // ----------------------------------------------------------------
+    function showToast(message, type = 'info', title = '') {
+        const container = document.getElementById('toastContainer');
+        if (!container) return;
+
+        const toast = document.createElement('div');
+        toast.className = 'pointer-events-auto transform transition-all duration-300 ease-out translate-y-[-20px] opacity-0 flex items-start space-x-3 p-3.5 rounded-2xl shadow-xl backdrop-blur-md text-xs border';
+
+        let bgStyle = 'bg-slate-900/95 text-white border-slate-700/80 shadow-slate-950/40';
+        let icon = '<i class="fa-solid fa-circle-info text-blue-400 text-sm mt-0.5"></i>';
+
+        if (type === 'success') {
+            bgStyle = 'bg-emerald-950/95 text-emerald-100 border-emerald-700/80 shadow-emerald-950/40';
+            icon = '<i class="fa-solid fa-circle-check text-emerald-400 text-sm mt-0.5"></i>';
+        } else if (type === 'error') {
+            bgStyle = 'bg-rose-950/95 text-rose-100 border-rose-700/80 shadow-rose-950/40';
+            icon = '<i class="fa-solid fa-circle-xmark text-rose-400 text-sm mt-0.5"></i>';
+        } else if (type === 'warning') {
+            bgStyle = 'bg-amber-950/95 text-amber-100 border-amber-700/80 shadow-amber-950/40';
+            icon = '<i class="fa-solid fa-triangle-exclamation text-amber-400 text-sm mt-0.5"></i>';
+        }
+
+        toast.className += ` ${bgStyle}`;
+        toast.innerHTML = `
+            <div class="flex-shrink-0">${icon}</div>
+            <div class="flex-1 pr-1">
+                ${title ? `<p class="font-bold text-[11px] uppercase tracking-wider mb-0.5">${title}</p>` : ''}
+                <p class="leading-relaxed font-medium">${escapeHtml(message)}</p>
+            </div>
+            <button onclick="this.parentElement.remove()" class="text-white/40 hover:text-white flex-shrink-0 text-xs transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        `;
+
+        container.appendChild(toast);
+
+        // Animate entrance
+        requestAnimationFrame(() => {
+            toast.classList.remove('translate-y-[-20px]', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+        });
+
+        // Auto dismiss after 3.5 seconds
+        setTimeout(() => {
+            toast.classList.remove('translate-y-0', 'opacity-100');
+            toast.classList.add('translate-y-[-20px]', 'opacity-0');
+            setTimeout(() => toast.remove(), 300);
+        }, 3500);
+    }
+
+    // ----------------------------------------------------------------
+    // REUSABLE NATIVE-FEEL CONFIRMATION MODAL HELPER
+    // ----------------------------------------------------------------
+    let genericConfirmCallback = null;
+    function showConfirmDialog({ title, message, iconClass = 'fa-triangle-exclamation', iconColor = 'text-rose-600', iconBg = 'bg-rose-50', confirmBtnClass = 'bg-rose-600 hover:bg-rose-700', confirmText = 'Ya, Lanjutkan', onConfirm }) {
+        document.getElementById('genConfirmTitle').innerText = title;
+        document.getElementById('genConfirmMessage').innerText = message;
+        document.getElementById('genConfirmIcon').className = `fa-solid ${iconClass}`;
+        document.getElementById('genConfirmIconWrap').className = `w-11 h-11 ${iconBg} ${iconColor} rounded-2xl flex items-center justify-center text-lg flex-shrink-0`;
+
+        const btn = document.getElementById('btnGenConfirmAction');
+        btn.className = `w-full py-2.5 px-3 rounded-xl ${confirmBtnClass} text-white font-bold text-xs shadow-md transition active:scale-95`;
+        btn.innerText = confirmText;
+
+        genericConfirmCallback = onConfirm;
+        document.getElementById('modalGenericConfirm').classList.remove('hidden');
+    }
+
+    function closeGenericConfirm(confirmed = false) {
+        document.getElementById('modalGenericConfirm').classList.add('hidden');
+        if (confirmed && typeof genericConfirmCallback === 'function') {
+            genericConfirmCallback();
+        }
+        genericConfirmCallback = null;
+    }
+    document.getElementById('btnGenConfirmAction').onclick = () => closeGenericConfirm(true);
+
+    // Live Phone Status Bar Clock
+    function updatePhoneClock() {
+        const el = document.getElementById('statusBarClock');
+        if (!el) return;
+        const now = new Date();
+        const hrs = String(now.getHours()).padStart(2, '0');
+        const mins = String(now.getMinutes()).padStart(2, '0');
+        el.innerText = `${hrs}:${mins}`;
+    }
+    setInterval(updatePhoneClock, 1000);
+    updatePhoneClock();
 
     // Inisialisasi Aplikasi Saat Dimuat
     window.addEventListener('DOMContentLoaded', () => {
@@ -747,7 +931,7 @@ $currentUser = getCurrentUser();
 
         // Validasi Hak Akses Frontend: Petugas Operasional hanya boleh ke Proses 3.0
         if (CURRENT_USER.peran === 'Petugas Operasional' && tabId !== 'tabProses3') {
-            alert('Akses Ditolak: Petugas Operasional hanya berhak mengakses Proses 3.0.');
+            showToast('Petugas Operasional hanya berhak mengakses Proses 3.0.', 'error', 'Akses Ditolak');
             return;
         }
 
@@ -787,12 +971,6 @@ $currentUser = getCurrentUser();
     // ----------------------------------------------------------------
     // AUTENTIKASI PENGGUNA (D6 Akun Pengguna)
     // ----------------------------------------------------------------
-    function fillQuickLogin(username, password) {
-        document.getElementById('loginUsername').value = username;
-        document.getElementById('loginPassword').value = password;
-        submitLogin();
-    }
-
     async function submitLogin() {
         const username = document.getElementById('loginUsername').value.trim();
         const password = document.getElementById('loginPassword').value.trim();
@@ -812,28 +990,41 @@ $currentUser = getCurrentUser();
             const result = await response.json();
 
             if (result.success) {
-                window.location.reload();
+                showToast(`Selamat datang, ${result.data.username}!`, 'success', 'Login Berhasil');
+                setTimeout(() => window.location.reload(), 600);
             } else {
                 document.getElementById('loginErrorMsg').innerText = result.message || 'Login gagal';
                 alertEl.classList.remove('hidden');
+                showToast(result.message || 'Username atau kata sandi tidak cocok.', 'error', 'Login Gagal');
             }
         } catch (err) {
             document.getElementById('loginErrorMsg').innerText = 'Koneksi ke server terputus.';
             alertEl.classList.remove('hidden');
+            showToast('Koneksi ke server lokal terputus.', 'error');
         } finally {
             btn.disabled = false;
             btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> <span>Masuk</span>';
         }
     }
 
-    async function handleLogout() {
-        if (!confirm('Apakah Anda yakin ingin logout?')) return;
-        try {
-            await fetch('api/auth.php?action=logout', { method: 'POST' });
-            window.location.reload();
-        } catch (e) {
-            window.location.reload();
-        }
+    function handleLogout() {
+        showConfirmDialog({
+            title: 'Konfirmasi Logout',
+            message: 'Apakah Anda yakin ingin keluar dari sesi aplikasi?',
+            iconClass: 'fa-arrow-right-from-bracket',
+            iconColor: 'text-amber-600',
+            iconBg: 'bg-amber-50',
+            confirmBtnClass: 'bg-amber-600 hover:bg-amber-700',
+            confirmText: 'Ya, Logout',
+            onConfirm: async () => {
+                try {
+                    await fetch('api/auth.php?action=logout', { method: 'POST' });
+                    window.location.reload();
+                } catch (e) {
+                    window.location.reload();
+                }
+            }
+        });
     }
 
     // ----------------------------------------------------------------
@@ -857,6 +1048,7 @@ $currentUser = getCurrentUser();
                 document.getElementById('inputNamaPelanggan').value = customer.nama;
                 document.getElementById('inputAlamatPelanggan').value = customer.alamat;
                 notice.classList.remove('hidden');
+                showToast(`Pelanggan lama "${customer.nama}" terdeteksi dari D1.`, 'info', 'Auto-fill Aktif');
             } else {
                 notice.classList.add('hidden');
             }
@@ -905,7 +1097,7 @@ $currentUser = getCurrentUser();
                 <input type="text" placeholder="Ciri (warna/merek)" class="item-ciri w-full px-2 py-1.5 text-xs rounded-lg border border-slate-300">
             </div>
             <div class="col-span-1 text-right">
-                <button type="button" onclick="document.getElementById('${rowId}').remove()" class="text-rose-500 hover:text-rose-700 text-xs">
+                <button type="button" onclick="document.getElementById('${rowId}').remove()" class="text-rose-500 hover:text-rose-700 text-xs active:scale-90">
                     <i class="fa-solid fa-trash"></i>
                 </button>
             </div>
@@ -934,7 +1126,7 @@ $currentUser = getCurrentUser();
         const total = calculatePriceClient();
 
         if (!nama || !hp || berat <= 0) {
-            alert('Mohon lengkapi data wajib (Nama, No. HP, Berat > 0).');
+            showToast('Mohon lengkapi data wajib: Nama, No. HP, dan Berat (> 0 kg).', 'warning', 'Validasi Data');
             return;
         }
 
@@ -999,6 +1191,7 @@ $currentUser = getCurrentUser();
             if (result.success && result.data) {
                 closeKonfirmasiPesananModal();
                 showNotaDigitalModal(result.data);
+                showToast('Pesanan berhasil dicatat dan status awal "Diterima"!', 'success', 'Tersimpan');
                 // Reset form
                 document.getElementById('formCatatPesanan').reset();
                 document.getElementById('containerRincianItem').innerHTML = '';
@@ -1006,10 +1199,10 @@ $currentUser = getCurrentUser();
                 document.getElementById('panelAntarJemput').classList.add('hidden');
                 calculatePriceClient();
             } else {
-                alert('Gagal mencatat pesanan: ' + (result.message || 'Kesalahan server.'));
+                showToast('Gagal mencatat pesanan: ' + (result.message || 'Kesalahan server.'), 'error');
             }
         } catch (e) {
-            alert('Terjadi kesalahan koneksi server.');
+            showToast('Terjadi kesalahan koneksi ke server lokal.', 'error');
         } finally {
             btn.disabled = false;
             btn.innerHTML = 'Ya, Simpan Pesanan';
@@ -1120,9 +1313,9 @@ $currentUser = getCurrentUser();
         currentFilterTab = status;
         document.querySelectorAll('.status-filter-btn').forEach(btn => {
             if (btn.dataset.filter === status) {
-                btn.className = 'status-filter-btn active px-3 py-1.5 rounded-xl font-semibold bg-blue-600 text-white shadow-xs whitespace-nowrap';
+                btn.className = 'status-filter-btn active px-3 py-1.5 rounded-xl font-semibold bg-blue-600 text-white shadow-xs whitespace-nowrap active:scale-95';
             } else {
-                btn.className = 'status-filter-btn px-3 py-1.5 rounded-xl font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap';
+                btn.className = 'status-filter-btn px-3 py-1.5 rounded-xl font-medium bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap active:scale-95';
             }
         });
         renderFilteredStatusOrders();
@@ -1182,20 +1375,20 @@ $currentUser = getCurrentUser();
                 ` : ''}
 
                 <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
-                    <button onclick="openDetailModal(${order.id})" class="text-blue-600 hover:text-blue-800 font-semibold text-[11px] flex items-center space-x-1">
+                    <button onclick="openDetailModal(${order.id})" class="text-blue-600 hover:text-blue-800 font-semibold text-[11px] flex items-center space-x-1 active:scale-95 transition">
                         <i class="fa-solid fa-circle-info"></i>
                         <span>Lihat Detail</span>
                     </button>
 
                     <div class="flex space-x-1.5">
                         <button onclick="openUbahStatusModal(${order.id}, 'pengerjaan', '${order.status_pengerjaan}')" 
-                                class="bg-blue-50 hover:bg-blue-100 text-blue-700 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition flex items-center space-x-1">
+                                class="bg-blue-50 hover:bg-blue-100 text-blue-700 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition flex items-center space-x-1 active:scale-95">
                             <i class="fa-solid fa-pen"></i>
                             <span>Status</span>
                         </button>
 
                         <button onclick="openUbahStatusModal(${order.id}, 'antar_jemput', '${order.status_antar_jemput || 'Dijadwalkan'}')" 
-                                class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition flex items-center space-x-1">
+                                class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition flex items-center space-x-1 active:scale-95">
                             <i class="fa-solid fa-truck-fast"></i>
                             <span>Antar/Jemput</span>
                         </button>
@@ -1221,7 +1414,7 @@ $currentUser = getCurrentUser();
 
             const container = document.getElementById('radioStatusOptions');
             container.innerHTML = STATUS_PENGERJAAN_BAKU.map(st => `
-                <label class="flex items-center justify-between p-2 rounded-xl border ${st === currentVal ? 'border-blue-500 bg-blue-50/50' : 'border-slate-200'} cursor-pointer hover:bg-slate-50">
+                <label class="flex items-center justify-between p-2 rounded-xl border ${st === currentVal ? 'border-blue-500 bg-blue-50/50' : 'border-slate-200'} cursor-pointer hover:bg-slate-50 transition">
                     <span class="font-medium text-slate-700">${st}</span>
                     <input type="radio" name="optStatusPengerjaan" value="${st}" ${st === currentVal ? 'checked' : ''} class="w-4 h-4 text-blue-600">
                 </label>
@@ -1234,7 +1427,7 @@ $currentUser = getCurrentUser();
 
             const container = document.getElementById('radioAJOptions');
             container.innerHTML = STATUS_AJ_BAKU.map(st => `
-                <label class="flex items-center justify-between p-2 rounded-xl border ${st === currentVal ? 'border-emerald-500 bg-emerald-50/50' : 'border-slate-200'} cursor-pointer hover:bg-slate-50">
+                <label class="flex items-center justify-between p-2 rounded-xl border ${st === currentVal ? 'border-emerald-500 bg-emerald-50/50' : 'border-slate-200'} cursor-pointer hover:bg-slate-50 transition">
                     <span class="font-medium text-slate-700">${st}</span>
                     <input type="radio" name="optStatusAJ" value="${st}" ${st === currentVal ? 'checked' : ''} class="w-4 h-4 text-emerald-600">
                 </label>
@@ -1258,7 +1451,7 @@ $currentUser = getCurrentUser();
         if (tipe === 'pengerjaan') {
             const selected = document.querySelector('input[name="optStatusPengerjaan"]:checked');
             if (!selected) {
-                alert('Pilih salah satu status pengerjaan.');
+                showToast('Silakan pilih salah satu status pengerjaan.', 'warning');
                 return;
             }
             payload.action = 'update_pengerjaan';
@@ -1266,7 +1459,7 @@ $currentUser = getCurrentUser();
         } else {
             const selected = document.querySelector('input[name="optStatusAJ"]:checked');
             if (!selected) {
-                alert('Pilih salah satu status antar-jemput.');
+                showToast('Silakan pilih salah satu status antar-jemput.', 'warning');
                 return;
             }
             payload.action = 'update_antar_jemput';
@@ -1286,15 +1479,16 @@ $currentUser = getCurrentUser();
 
             if (result.success) {
                 closeUbahStatusModal();
+                showToast(result.message || 'Status berhasil diperbarui!', 'success', 'Tercatat di D7');
                 loadStatusOrders();
                 if (document.getElementById('inputPencarian').value.trim()) {
                     searchPesanan(document.getElementById('inputPencarian').value.trim());
                 }
             } else {
-                alert('Gagal mengubah status: ' + (result.message || 'Error'));
+                showToast('Gagal mengubah status: ' + (result.message || 'Error'), 'error');
             }
         } catch (e) {
-            alert('Kesalahan jaringan saat mengubah status.');
+            showToast('Kesalahan jaringan saat mengubah status.', 'error');
         } finally {
             btn.disabled = false;
             btn.innerHTML = 'Konfirmasi Ubah';
@@ -1362,10 +1556,10 @@ $currentUser = getCurrentUser();
 
                 document.getElementById('modalDetailPesanan').classList.remove('hidden');
             } else {
-                alert('Pesanan tidak ditemukan.');
+                showToast('Pesanan tidak ditemukan.', 'warning');
             }
         } catch (e) {
-            alert('Gagal mengambil detail pesanan.');
+            showToast('Gagal mengambil detail pesanan.', 'error');
         }
     }
 
@@ -1417,7 +1611,7 @@ $currentUser = getCurrentUser();
 
                         ${item.status === 'Ditemukan' ? `
                             <div class="pt-2 border-t border-slate-100 text-right">
-                                <button onclick="updateStatusCucian(${item.id}, 'Diserahkan')" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-xl text-xs font-semibold transition flex items-center space-x-1 ml-auto">
+                                <button onclick="updateStatusCucian(${item.id}, 'Diserahkan')" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-xl text-xs font-semibold transition flex items-center space-x-1 ml-auto active:scale-95">
                                     <i class="fa-solid fa-hand-holding-hand"></i>
                                     <span>Tandai Diserahkan</span>
                                 </button>
@@ -1437,7 +1631,7 @@ $currentUser = getCurrentUser();
         const btn = document.getElementById('btnSubmitCucianHilang');
 
         if (!deskripsi) {
-            alert('Deskripsi barang cucian tanpa pemilik wajib diisi.');
+            showToast('Deskripsi barang cucian tanpa pemilik wajib diisi.', 'warning');
             return;
         }
 
@@ -1461,40 +1655,50 @@ $currentUser = getCurrentUser();
             if (json.success) {
                 document.getElementById('formCucianHilang').reset();
                 loadCucianHilangList();
-                alert('Cucian tanpa pemilik berhasil disimpan.');
+                showToast('Cucian tanpa pemilik berhasil disimpan ke Data Store D4.', 'success');
             } else {
-                alert('Gagal: ' + (json.message || 'Error'));
+                showToast('Gagal: ' + (json.message || 'Error'), 'error');
             }
         } catch (e) {
-            alert('Kesalahan server saat menyimpan cucian tanpa pemilik.');
+            showToast('Kesalahan server saat menyimpan cucian tanpa pemilik.', 'error');
         } finally {
             btn.disabled = false;
             btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> <span>Simpan ke Data Store D4</span>';
         }
     }
 
-    async function updateStatusCucian(id, statusBaru) {
-        if (!confirm(`Konfirmasi: Ubah status cucian tanpa pemilik menjadi "${statusBaru}"?`)) return;
+    function updateStatusCucian(id, statusBaru) {
+        showConfirmDialog({
+            title: 'Konfirmasi Penyerahan Barang',
+            message: `Apakah Anda yakin ingin mengubah status cucian ini menjadi "${statusBaru}"?`,
+            iconClass: 'fa-handshake',
+            iconColor: 'text-emerald-600',
+            iconBg: 'bg-emerald-50',
+            confirmBtnClass: 'bg-emerald-600 hover:bg-emerald-700',
+            confirmText: 'Ya, Tandai Diserahkan',
+            onConfirm: async () => {
+                const formData = new FormData();
+                formData.append('action', 'update_status');
+                formData.append('id', id);
+                formData.append('status', statusBaru);
 
-        const formData = new FormData();
-        formData.append('action', 'update_status');
-        formData.append('id', id);
-        formData.append('status', statusBaru);
-
-        try {
-            const res = await fetch('api/cucian_hilang.php', {
-                method: 'POST',
-                body: formData
-            });
-            const json = await res.json();
-            if (json.success) {
-                loadCucianHilangList();
-            } else {
-                alert('Gagal: ' + json.message);
+                try {
+                    const res = await fetch('api/cucian_hilang.php', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const json = await res.json();
+                    if (json.success) {
+                        showToast(`Status barang berhasil diubah ke "${statusBaru}".`, 'success');
+                        loadCucianHilangList();
+                    } else {
+                        showToast('Gagal: ' + json.message, 'error');
+                    }
+                } catch (e) {
+                    showToast('Kesalahan saat memperbarui status cucian.', 'error');
+                }
             }
-        } catch (e) {
-            alert('Kesalahan saat memperbarui status cucian.');
-        }
+        });
     }
 
     function escapeHtml(text) {
